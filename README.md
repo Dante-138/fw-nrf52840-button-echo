@@ -1,3 +1,11 @@
+<p align="center">
+  <img src="https://img.shields.io/badge/MCU-nRF52840-blue?style=flat-square" alt="nRF52840"/>
+  <img src="https://img.shields.io/badge/RTOS-Zephyr-green?style=flat-square" alt="Zephyr"/>
+  <img src="https://img.shields.io/badge/SDK-nRF_Connect-red?style=flat-square" alt="nRF Connect SDK"/>
+  <img src="https://img.shields.io/badge/Features-GPIO_+_UART-orange?style=flat-square" alt="GPIO UART"/>
+  <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square" alt="MIT"/>
+</p>
+
 # nRF52840 DK - Button Detection + UART Echo
 
 Firmware para a **nRF52840 DK** desenvolvido com **Zephyr RTOS** (nRF Connect SDK).
