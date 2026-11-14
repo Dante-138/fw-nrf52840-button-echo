@@ -1,104 +1,13 @@
-<p align="center">
-  <img src="https://img.shields.io/badge/MCU-nRF52840-blue?style=flat-square" alt="nRF52840"/>
-  <img src="https://img.shields.io/badge/RTOS-Zephyr-green?style=flat-square" alt="Zephyr"/>
-  <img src="https://img.shields.io/badge/SDK-nRF_Connect-red?style=flat-square" alt="nRF Connect SDK"/>
-  <img src="https://img.shields.io/badge/Features-GPIO_+_UART-orange?style=flat-square" alt="GPIO UART"/>
-  <img src="https://img.shields.io/badge/License-MIT-lightgrey?style=flat-square" alt="MIT"/>
-</p>
+# fw-nrf52840-button-echo
 
-# nRF52840 DK - Button Detection + UART Echo
+Button detection and UART echo on the nRF52840 DK. Zephyr RTOS, nRF Connect SDK.
 
-Firmware para a **nRF52840 DK** desenvolvido com **Zephyr RTOS** (nRF Connect SDK).
+## What it does
 
-## Funcionalidades
+- Button detection: the four DK buttons are GPIO inputs with an interrupt on the active edge (`GPIO_INT_EDGE_TO_ACTIVE`). One callback handles all of them and identifies the source by bitmask, then prints a line such as `Botao 1 pressionado!`.
+- UART echo: interrupt-driven UART (`CONFIG_UART_INTERRUPT_DRIVEN=y`). The RX callback reads the FIFO and echoes through `uart_poll_out()`. `\r` is echoed with `\n` added.
 
-### 1. Detecao de Botoes (1-4)
-Detecta o pressionamento dos 4 botoes da DK via interrupcao GPIO e imprime no terminal serial qual botao foi pressionado.
-
-```
-Botao 1 pressionado!
-Botao 2 pressionado!
-Botao 3 pressionado!
-Botao 4 pressionado!
-```
-
-### 2. Echo UART
-Qualquer caractere digitado no terminal serial (PuTTY, minicom, etc.) e ecoado de volta imediatamente. Funciona via interrupcao de RX na UART.
-
-## Hardware
-
-| Componente | Descricao |
-|---|---|
-| **Placa** | nRF52840 DK (PCA10056) |
-| **MCU** | nRF52840 (ARM Cortex-M4F, 64 MHz) |
-| **Botoes** | SW1-SW4 (GPIO com pull-up interno) |
-| **UART** | USB CDC ACM via J-Link onboard |
-
-### Pinagem dos Botoes (nRF52840 DK)
-
-| Botao | Pino GPIO | Alias no Devicetree |
-|---|---|---|
-| Button 1 (SW1) | P0.11 | `sw0` |
-| Button 2 (SW2) | P0.12 | `sw1` |
-| Button 3 (SW3) | P0.24 | `sw2` |
-| Button 4 (SW4) | P0.25 | `sw3` |
-
-## Pre-requisitos
-
-- [nRF Connect SDK](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-SDK) v2.7.0+ ou v3.x
-- [nRF Connect for Desktop](https://www.nordicsemi.com/Products/Development-tools/nRF-Connect-for-Desktop) com Toolchain Manager
-- nRF52840 DK conectada via USB
-- Terminal serial (PuTTY, minicom, Tera Term, etc.)
-
-## Estrutura do Projeto
-
-```
-nrf52840_button_echo/
-├── CMakeLists.txt      # Configuracao de build CMake
-├── prj.conf            # Configuracao do Zephyr (Kconfig)
-├── README.md
-├── .gitignore
-└── src/
-    └── main.c          # Codigo fonte principal
-```
-
-## Como Compilar e Gravar
-
-### 1. Abra o terminal do nRF Connect SDK
-
-Use o terminal integrado do **Toolchain Manager** ou da extensao **nRF Connect** no VS Code.
-
-### 2. Compile o projeto
-
-```bash
-cd /caminho/para/nrf52840_button_echo
-west build -b nrf52840dk/nrf52840 . --no-sysbuild
-```
-
-> **Nota:** Use `--no-sysbuild` se estiver usando nRF Connect SDK v3.x.
-
-### 3. Grave na placa
-
-```bash
-west flash
-```
-
-### 4. Conecte o terminal serial
-
-Abra o PuTTY (ou outro terminal serial) com as seguintes configuracoes:
-
-| Parametro | Valor |
-|---|---|
-| **Porta** | COMx (verifique no Gerenciador de Dispositivos) |
-| **Baud Rate** | 115200 |
-| **Data Bits** | 8 |
-| **Stop Bits** | 1 |
-| **Parity** | None |
-| **Flow Control** | None |
-
-## Saida Esperada
-
-Ao abrir o terminal, voce vera:
+Startup banner:
 
 ```
 =================================
@@ -108,32 +17,45 @@ Pressione os botoes 1-4 na DK.
 Digite algo para testar o echo.
 ```
 
-- Pressione qualquer botao (1-4) na DK para ver a mensagem correspondente
-- Digite qualquer texto no terminal para ver o echo
+The messages printed by the firmware are in Portuguese.
 
-## Detalhes Tecnicos
+## Hardware
 
-### Botoes
-- Configurados como **GPIO Input** com interrupcao na borda ativa (`GPIO_INT_EDGE_TO_ACTIVE`)
-- Pull-up interno habilitado via devicetree da DK
-- Callback unico trata todos os 4 botoes, identificando qual gerou a interrupcao via bitmask
+| Item | Detail |
+|---|---|
+| Board | nRF52840 DK (PCA10056) |
+| MCU | nRF52840, Cortex-M4F, 64 MHz |
+| UART | J-Link VCOM over USB, 115200 8N1, no flow control |
 
-### UART Echo
-- Usa **UART interrupt-driven** (`CONFIG_UART_INTERRUPT_DRIVEN=y`)
-- Callback de RX le caracteres do FIFO e ecoa imediatamente via `uart_poll_out()`
-- Trata `\r` (Enter) adicionando `\n` para nova linha correta no terminal
+| Button | GPIO | Devicetree alias |
+|---|---|---|
+| SW1 | P0.11 | `sw0` |
+| SW2 | P0.12 | `sw1` |
+| SW3 | P0.24 | `sw2` |
+| SW4 | P0.25 | `sw3` |
 
-### Configuracoes Kconfig (prj.conf)
+## Build
 
+Requires nRF Connect SDK v2.7.0 or newer, including v3.x.
+
+```bash
+west build -b nrf52840dk/nrf52840 . --no-sysbuild
 ```
-CONFIG_GPIO=y                  # Habilita driver GPIO
-CONFIG_SERIAL=y                # Habilita driver serial
-CONFIG_CONSOLE=y               # Habilita console
-CONFIG_UART_CONSOLE=y          # Console via UART
-CONFIG_PRINTK=y                # Habilita printk()
-CONFIG_UART_INTERRUPT_DRIVEN=y # UART por interrupcao (para echo)
+
+`--no-sysbuild` is needed on SDK v3.x.
+
+## Flash
+
+```bash
+west flash
 ```
 
-## Licenca
+## Test
 
-MIT License
+1. Open a serial terminal on the DK's COM port: 115200 baud, 8N1, no flow control.
+2. Press SW1 to SW4: each press prints the matching message.
+3. Type text: it is echoed back.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
